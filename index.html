@@ -4,15 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="Stiil.css">
     <title>JSON Failid üles</title>
+    <script>
+        "use strict";
+        function submitForm(formObject)
+        {
+          var xhr = new XMLHttpRequest();
+          xhr.onload = function(){ 
+              const response = document.getElementById("response")
+              response.innerHTML = xhr.responseText; } // läheb
+          xhr.onerror = function(){ alert (xhr.responseText); } // ei lähe
+          xhr.open (formObject.method, formObject.action, true);
+          xhr.send (new FormData (formObject));
+          return false;
+        }
+        </script>
 </head>
 <body>
     <div class="container">
-        <form class="form" action="upload.php" method="POST" enctype="multipart/form-data">
+        <form class="form" action="upload.php" method="POST" enctype="multipart/form-data" onsubmit="return submitForm(this);">
             <input type="file" name="file" accept="application/json"/>
             <!-- <label for="file"><span id="file-selected"></span><strong>Choose file</strong></label> -->
             <input type="submit" value="Upload File" name="submit" />
         </form>
+        <section id="response" class="response"></section>
         <!-- <script src="upload.js"></script> -->
     </div>
 </body>

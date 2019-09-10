@@ -47,3 +47,25 @@ body {
 .form input[type="submit"]:focus {
     outline: none;
 }
+
+.msg-success {
+    background-color:#20aa41;
+}
+
+.msg-error {
+    background-color: #ca2434;
+}
+
+.msg-success, .msg-error {
+    color: #fff6e7;
+    text-align: center;
+    padding: 1rem;
+    font-weight: bold;
+    border: 1px solid #ffffff00;
+    border-radius: 4px;
+}
+
+.response {
+    width: 767px;
+    margin-top: 2em;
+}
