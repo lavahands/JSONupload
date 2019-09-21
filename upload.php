@@ -32,18 +32,20 @@ function isMultiArray($arrays)
 
 function checkKeys($array, $obj)
 {
+    $funErrors = [];
     if (!isset($array['name'])) {
-        $jerrors[] = 'JSON object number: ' . $obj . ' is missing key "name"';
+        $funErrors[] = 'JSON object number: ' . $obj . ' is missing key "name"';
     }
     if (!isset($array['phone'])) {
-        $jerrors[] = 'JSON object number: ' . $obj . ' is missing key "phone"';
+        $funErrors[] = 'JSON object number: ' . $obj . ' is missing key "phone"';
     }
     if (!isset($array['address'])) {
-        $jerrors[] = 'JSON object number: ' . $obj . ' is missing key "address"';
+        $funErrors[] = 'JSON object number: ' . $obj . ' is missing key "address"';
     }
     if (!isset($array['website'])) {
-        $jerrors[] = 'JSON object number: ' . $obj . ' is missing key "website"';
+        $funErrors[] = 'JSON object number: ' . $obj . ' is missing key "website"';
     }
+    return $funErrors;
 }
 
 //faili loogika
@@ -65,12 +67,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($ext !== strtolower(end($file_ext))) {
             $errors[] = 'Forbidden extention: ' . $file_name . ' ' . $file_type;
         }
-        // mime
+        // mime kontroll
         $mime = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $file_tmp);
         if ($mime !== 'text/plain') {
             $errors[] = 'Invalid file format: ' . $mime;
         }
-
+        // JSON loogika
         if (empty($errors)) {
             $jerrors = [];
             $jsondata = file_get_contents($file_tmp);
@@ -79,64 +81,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($json == null || json_last_error() !== JSON_ERROR_NONE) {
                 $jerrors[] = 'Invalid JSON format';
             } else {
-                if (isMultiArray($json)) {
-                    $objectNumber = 0;
-                    foreach ($json as $array => $keys) {
-                        $objectNumber++;
-                        checkKeys($json[$array], $objectNumber);
-                        foreach ($json[$array] as $key => $value) {
-                            switch ($key) {
-                                case "name":
-                                    if (validName($value)) {
-                                        $jerrors[] = 'JSON object number: ' . $objectNumber . ' value of key "name" is incorrect';
-                                    }
-                                    break;
-                                case "address":
-                                    if (validAddress($value)) {
-                                        $jerrors[] = 'JSON object number: ' . $objectNumber . ' value of key "address" is incorrect';
-                                    }
-                                    break;
-                                case "phone":
-                                    if (validPhone($value)) {
-                                        $jerrors[] = 'JSON object number: ' . $objectNumber . ' value of key "phone" is incorrect';
-                                    }
-                                    break;
-                                case "website":
-                                    if (validWebsite($value)) {
-                                        $jerrors[] = 'JSON object number: ' . $objectNumber . ' value of key "website" is incorrect';
-                                    }
-                                    break;
-                                default:
-                                    $jerrors[] = 'JSON object number: ' . $objectNumber . ' contains illegal key: ' . $key;
-                            }
-                        }
-                    }
-                } else {
-                    checkKeys($json, 1); //Single object json file
-                    foreach ($json as $key => $value) {
+                // Muudab üksiku massiiviks
+                if (!isMultiArray($json)) {
+                    $json = array($json);
+                }
+                // Arrayde kontroll
+                $objectNumber = 0;
+                foreach ($json as $array => $keys) {
+                    $objectNumber++;
+                    $jerrors = $jerrors + checkKeys($json[$array], $objectNumber);
+                    foreach ($json[$array] as $key => $value) {
                         switch ($key) {
                             case "name":
                                 if (validName($value)) {
-                                    $jerrors[] = 'Value of key "name" is incorrect';
+                                    $jerrors[] = 'JSON object number: ' . $objectNumber . ' value of key "name" is incorrect';
                                 }
                                 break;
                             case "address":
                                 if (validAddress($value)) {
-                                    $jerrors[] = 'Value of key "address" is incorrect';
+                                    $jerrors[] = 'JSON object number: ' . $objectNumber . ' value of key "address" is incorrect';
                                 }
                                 break;
                             case "phone":
                                 if (validPhone($value)) {
-                                    $jerrors[] = 'Value of key "phone" is incorrect';
+                                    $jerrors[] = 'JSON object number: ' . $objectNumber . ' value of key "phone" is incorrect';
                                 }
                                 break;
                             case "website":
                                 if (validWebsite($value)) {
-                                    $jerrors[] = 'Value of key "website" is incorrect';
+                                    $jerrors[] = 'JSON object number: ' . $objectNumber . ' value of key "website" is incorrect';
                                 }
                                 break;
                             default:
-                                $jerrors[] = 'JSON object contains illegal key: ' . $key;
+                                $jerrors[] = 'JSON object number: ' . $objectNumber . ' contains illegal key: ' . $key;
                         }
                     }
                 }
